@@ -317,14 +317,15 @@ encodeError = (obj) ->
   else
     obj
 
+isChromeUrl = (url) ->
+  list = ['chrome', 'moz-', 'about:']
+  return list.some(prefix => url.substr(0, prefix.length) == prefix)
+
 refreshActivePageIfEnabled = ->
   return if localStorage['omega.local.refreshOnProfileChange'] == 'false'
   chrome.tabs.query {active: true, lastFocusedWindow: true}, (tabs) ->
     url = tabs[0].url
-    return if not url
-    return if url.substr(0, 6) == 'chrome'
-    return if url.substr(0, 6) == 'about:'
-    return if url.substr(0, 4) == 'moz-'
+    return if not url or isChromeUrl(url) 
     chrome.tabs.reload(tabs[0].id, {bypassCache: true})
 
 chrome.runtime.onMessage.addListener (request, sender, respond) ->

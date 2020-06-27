@@ -68,6 +68,10 @@ class ChromeOptions extends OmegaTarget.Options
       chrome.browserAction.setBadgeText?(text: '')
     return
 
+  isChromeUrl: (url) ->
+    list = ['chrome', 'moz-', 'about:']
+    return list.some(prefix => url.substr(0, prefix.length) == prefix)
+
   _quickSwitchInit: false
   _quickSwitchHandlerReady: false
   _quickSwitchCanEnable: false
@@ -102,10 +106,7 @@ class ChromeOptions extends OmegaTarget.Options
           @applyProfile(profiles[index]).then =>
             if @_options['-refreshOnProfileChange']
               url = tab.url
-              return if not url
-              return if url.substr(0, 6) == 'chrome'
-              return if url.substr(0, 6) == 'about:'
-              return if url.substr(0, 4) == 'moz-'
+              return if not url or @isChromeUrl(url)
               chrome.tabs.reload(tab.id)
     else
       chrome.browserAction.setPopup({popup: 'popup/index.html'})
